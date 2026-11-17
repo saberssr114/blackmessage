@@ -1,6 +1,7 @@
-<div align="center">
+<div align="center"
 
-<img src="assets/banner.png" alt="BLACKMESSAGE Banner" width="100%" />
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/56440f6c-892c-4478-846c-b650b10498fd" />
+
 
 # BLACKMESSAGE
 
@@ -38,7 +39,7 @@
 ## 🎨 Theme & Preview
 
 <div align="center">
-  <img src="assets/preview.png" alt="BLACKMESSAGE Dark Theme & UI Preview" width="100%" />
+  
 </div>
 
 * **Clean Chat Interface:** Large, readable message bubbles with clear sender names and zero clutter[cite: 4, 5].
