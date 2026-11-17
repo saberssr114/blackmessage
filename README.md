@@ -27,6 +27,9 @@
 
 **BLACKMESSAGE** is a sleek, obsidian-dark messenger built for speed and privacy across **Android** and **Windows**[cite: 4, 5]. Designed with a high-contrast dark interface (`#030305`) and neon crimson accents (`#ff3b1f`), it keeps your conversations fast, clean, and easy on the eyes day or night[cite: 4, 5].
 
+![image alt](https://github.com/saberssr114/blackmessage/blob/99451872687180baeaa673d33c653d74342f4dfd/Gemini_Generated_Image_bf72d2bf72d2bf72%20(2).jfif)
+
+
 ---
 
 ## 🔥 Features
@@ -39,6 +42,9 @@
 | **📁 File Sharing** | Send photos, documents, and videos directly inside any conversation[cite: 4, 5]. |
 | **🌑 Dark by Design** | Full-system obsidian theme crafted for zero eye strain in low-light environments[cite: 4, 5]. |
 | **📱💻 Cross-Platform** | Native support for both Android (`.apk`) and Windows (`.exe`)[cite: 4, 5]. |
+
+![image alt](https://github.com/saberssr114/blackmessage/blob/99451872687180baeaa673d33c653d74342f4dfd/Gemini_Generated_Image_bf72d2bf72d2bf72%20(1).jfif)
+
 
 ---
 
