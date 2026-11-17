@@ -1,7 +1,5 @@
 <div align="center"
 
-full app to windows and android coming soon
-
 <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/56440f6c-892c-4478-846c-b650b10498fd" />
 
 ![image alt](https://github.com/saberssr114/blackmessage/blob/3760ce5d9a5ba9cd0ca3b19b94372ace4321c538/logoweb.png)
