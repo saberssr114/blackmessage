@@ -1,0 +1,803 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>BlackMessage — Messages</title>
+  <meta name="theme-color" content="#0e1621">
+  <meta name="description" content="BlackMessage - a dark, fast messenger. Chat, share files and keep your conversations private.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/logo-32.png">
+  <link rel="apple-touch-icon" href="assets/logo-192.png">
+  <link rel="stylesheet" href="stayle.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #afbbd4;
+      --panel: #adcacac7;
+      --text: #1b1b1b;
+      --muted: #686868;
+      --line: #ffffffb3;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --bubble: #ffffffd9;
+      --mine: #dbeafe;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #050505;
+      --panel: #1a1a1ac9;
+      --text: #f5f5f5;
+      --muted: #aaa;
+      --line: #ffffff2e;
+      --blue: #8db4ff;
+      --blue-soft: #ffffff18;
+      --bubble: #292929db;
+      --mine: #303642;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 15px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app {
+      height: 100vh; height: 100dvh; max-width: 1700px; margin: auto; padding: 24px;
+      display: grid; grid-template-columns: 380px minmax(0, 1fr);
+      gap: 20px;
+    }
+    .sidebar, .conversation {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 24px; overflow: hidden;
+      box-shadow: 0 18px 48px #0002;
+    }
+    .sidebar { display: flex; flex-direction: column; }
+    .side-head { padding: 20px 18px 14px; }
+    .brand-row, .profile-row, .chat-head, .composer {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .brand-row { justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 750; font-size: 19px; }
+    .logo {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      color: white; background: #080808;
+      border-radius: 12px; box-shadow: 0 5px 12px #0005;
+    }
+    .icon-btn {
+      width: 38px; height: 38px; border: 0; border-radius: 12px;
+      color: var(--muted); background: transparent; font-size: 19px;
+    }
+    .icon-btn:hover { background: var(--blue-soft); color: var(--blue); }
+    .search {
+      margin-top: 17px; width: 100%; border: 1px solid var(--line);
+      background: var(--bg); color: var(--text); border-radius: 12px;
+      padding: 11px 13px; outline: none;
+    }
+    .search:focus, .field:focus { border-color: var(--blue); }
+    .section-label {
+      padding: 9px 18px; color: var(--muted); font-size: 11px;
+      font-weight: 750; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .chat-list { flex: 1; min-height: 0; overflow: auto; padding: 0 8px; }
+    .chat-item-row {
+      display: flex; gap: 4px; align-items: center; margin: 2px 0;
+      padding-right: 4px; border-radius: 14px; transition: background .2s ease;
+    }
+    .chat-item-row:hover, .chat-item-row:focus-within { background: color-mix(in srgb, var(--panel) 55%, transparent); }
+    .chat-item {
+      display: flex; gap: 11px; align-items: center; flex: 1; min-width: 0;
+      padding: 11px 10px; border: 0; border-radius: 14px;
+      text-align: left; color: var(--text); background: transparent;
+      transition: background .18s, transform .18s;
+    }
+    .chat-item:hover { background: var(--bg); }
+    .chat-item.active { background: var(--blue-soft); }
+    .chat-more { flex: 0 0 36px; opacity: .7; }
+    .chat-more:hover, .chat-item-row:focus-within .chat-more { opacity: 1; }
+    .avatar {
+      width: 46px; height: 46px; flex: 0 0 46px; border-radius: 50%;
+      display: grid; place-items: center; color: white; font-weight: 700;
+      background: linear-gradient(145deg, #78c6f3, #4388d5);
+    }
+    .avatar.pink { background: linear-gradient(145deg, #f69db5, #cf648d); }
+    .avatar.gold { background: linear-gradient(145deg, #f4c675, #dc8d45); }
+    .avatar.purple { background: linear-gradient(145deg, #b6a0f3, #7965c9); }
+    .chat-copy { min-width: 0; flex: 1; }
+    .chat-title, .chat-preview {
+      display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .chat-title { font-weight: 650; }
+    .chat-preview { margin-top: 3px; font-size: 13px; color: var(--muted); }
+    .profile-row {
+      margin-top: 0; padding: 14px; border-top: 1px solid var(--line);
+    }
+    .profile-info { flex: 1; min-width: 0; }
+    .profile-info strong, .profile-info small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .profile-info small { color: var(--muted); margin-top: 2px; }
+    .conversation { display: flex; flex-direction: column; }
+    .chat-head {
+      min-height: 88px; padding: 16px 24px; border-bottom: 1px solid var(--line);
+    }
+    .chat-head .chat-copy { flex: 1; }
+    .status { color: #33aa78; font-size: 12px; margin-top: 3px; }
+    .messages {
+      flex: 1; overflow-y: auto; padding: 26px clamp(16px, 5vw, 70px);
+      background:
+        radial-gradient(circle at 20% 15%, #59a7e50b 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 55%, #59a7e509 0 2px, transparent 3px),
+        var(--bg);
+      background-size: 40px 40px, 53px 53px, auto;
+    }
+    .day { text-align: center; color: var(--muted); font-size: 12px; margin: 0 0 20px; }
+    .message {
+      width: fit-content; max-width: min(78%, 520px); padding: 10px 13px;
+      border-radius: 15px; background: var(--bubble); margin: 9px 0;
+      box-shadow: 0 3px 10px #1b344408; animation: pop .2s ease-out;
+      overflow-wrap: anywhere;
+    }
+    .message.mine { margin-left: auto; background: var(--mine); border-bottom-right-radius: 5px; }
+    .message.theirs { border-bottom-left-radius: 5px; }
+    .time { display: block; text-align: right; font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .composer { padding: 14px 18px; border-top: 1px solid var(--line); }
+    .composer input {
+      flex: 1; min-width: 0; border: 0; outline: none; border-radius: 14px;
+      background: var(--bg); color: var(--text); padding: 13px 15px;
+    }
+    .send {
+      border: 0; border-radius: 13px; padding: 11px 17px; color: white;
+      background: var(--blue); font-weight: 700; transition: transform .16s;
+    }
+    .send:hover { transform: translateY(-2px); }
+    .empty { color: var(--muted); text-align: center; padding: 30px 10px; }
+    dialog {
+      width: min(420px, calc(100% - 28px)); border: 1px solid var(--line);
+      border-radius: 20px; padding: 0; color: var(--text); background: var(--panel);
+      box-shadow: 0 25px 90px #0004;
+    }
+    dialog::backdrop { background: #10202f88; backdrop-filter: blur(4px); }
+    .modal { padding: 23px; }
+    .modal h2 { margin: 0 0 6px; }
+    .modal p { color: var(--muted); margin: 0 0 19px; font-size: 14px; }
+    .field {
+      display: block; width: 100%; padding: 12px; margin: 8px 0 14px;
+      border: 1px solid var(--line); border-radius: 11px;
+      background: var(--bg); color: var(--text); outline: none;
+    }
+    .check { display: flex; gap: 9px; align-items: center; margin: 8px 0 18px; font-size: 14px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 9px; }
+    .secondary {
+      border: 1px solid var(--line); border-radius: 11px; padding: 10px 14px;
+      background: transparent; color: var(--text);
+    }
+    @keyframes pop { from { opacity: 0; transform: translateY(5px) scale(.98); } to { opacity: 1; transform: none; } }
+    @media (max-width: 700px) {
+      .app { padding: 0; display: block; }
+      .sidebar, .conversation { height: 100vh; height: 100dvh; border-radius: 0; border: 0; }
+      .conversation { display: none; }
+      body.chat-open .sidebar { display: none; }
+      body.chat-open .conversation { display: flex; }
+      .back { display: inline-grid !important; }
+      .mobile-menu-toggle { display: inline-grid !important; place-items: center; }
+    }
+    .back { display: none; }
+    .mobile-menu-toggle { display: none; }
+  </style>
+  <link rel="stylesheet" href="telegram.css">
+</head>
+<body>
+  <section class="offline-screen" id="offlineScreen" hidden role="status" aria-live="polite">
+    <div class="offline-card">
+      <span class="offline-icon" aria-hidden="true">⌁</span>
+      <p class="offline-code">404</p>
+      <h1 data-i18n="offlineTitle">Connection unavailable</h1>
+      <p data-i18n="offlineMessage">Your device appears to be offline. Check your internet connection and try again.</p>
+      <button class="send" id="retryConnection" type="button" data-i18n="retry">Try again</button>
+    </div>
+  </section>
+
+  <section class="auth-screen" id="authScreen">
+    <form class="auth-card" id="authForm">
+      <div class="brand auth-brand"><img class="logo-img" src="assets/logo.svg" alt="BlackMessage logo"> BlackMessage</div>
+      <h1 data-i18n="welcome">Welcome to BlackMessage</h1>
+      <p data-i18n="authNotice">Your account and conversations are stored on this device. Email codes are shown on screen and are not sent.</p>
+      <div id="authEntry">
+      <div class="auth-modes">
+        <button class="secondary active" id="signInMode" type="button" data-i18n="signIn">Sign in</button>
+        <button class="secondary" id="signUpMode" type="button" data-i18n="createAccount">Create account</button>
+      </div>
+      <label for="authEmail" data-i18n="emailAddress">Email address</label>
+      <input class="field" id="authEmail" type="email" autocomplete="email" required data-i18n-placeholder="emailPlaceholder" placeholder="you@example.com">
+      <p class="auth-error" id="authError" role="alert" hidden></p>
+      <button class="send auth-submit" id="authSubmit" type="submit" data-i18n="signIn">Sign in</button>
+      </div>
+      <section id="verificationStep" class="verification-step" hidden>
+        <h2 data-i18n="verifyEmail">Verify your email</h2>
+        <p id="verificationPurposeNote" data-i18n="verificationDemo">No email is sent. Enter the code shown here:</p>
+        <output id="demoVerificationCode" class="demo-code"></output>
+        <label for="verificationCode" data-i18n="sixDigitCode">Six-digit code</label>
+        <input class="field verification-input" id="verificationCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" data-i18n-placeholder="codePlaceholder" placeholder="000000">
+        <p class="auth-error" id="verificationError" role="alert" hidden></p>
+        <div class="verification-actions">
+          <button class="secondary" id="cancelVerification" type="button" data-i18n="back">Back</button>
+          <button class="secondary" id="resendCode" type="button" data-i18n="resendCode">New code</button>
+          <button class="send" id="verifyCode" type="button" data-i18n="verify">Verify</button>
+        </div>
+      </section>
+      <div class="auth-language-picker">
+        <div class="auth-theme-picker">
+          <span data-i18n="colorTheme">Color theme</span>
+          <div class="theme-choice-buttons" role="group" aria-label="Color theme">
+            <button class="theme-choice" type="button" data-theme-choice="dark" aria-pressed="false" data-i18n="dark">Dark</button>
+            <button class="theme-choice" type="button" data-theme-choice="light" aria-pressed="false" data-i18n="light">Light</button>
+          </div>
+        </div>
+        <span data-i18n="language">Language</span>
+        <div class="language-choice-buttons" role="group" aria-label="Language">
+          <button class="language-choice" type="button" data-language="en" aria-pressed="false">English</button>
+          <button class="language-choice" type="button" data-language="fr" aria-pressed="false">Français</button>
+          <button class="language-choice" type="button" data-language="ar" aria-pressed="false">العربية</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <main class="app" id="app" hidden>
+    <button class="mobile-menu-backdrop" id="mobileMenuBackdrop" type="button" aria-label="Close navigation menu" hidden></button>
+    <aside class="sidebar" id="mobileNavigation">
+      <div class="side-head">
+        <div class="brand-row">
+          <div class="brand"><img class="logo-img" src="assets/logo.svg" alt="BlackMessage logo"> BlackMessage</div>
+          <div class="brand-actions">
+            <button class="icon-btn" id="codeBtn" title="Open Code Studio" aria-label="Open Code Studio">⌘</button>
+            <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
+            <button class="icon-btn" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">☾</button>
+          </div>
+        </div>
+        <input class="search" id="search" data-i18n-placeholder="search" placeholder="⌕ Search chats and local accounts">
+      </div>
+      <div class="section-label" data-i18n="messages">Messages</div>
+      <button class="library-button" id="filesBtn" data-i18n="myFiles">My files</button>
+      <button class="library-button" id="findFriendsBtn" data-i18n="findFriends">⌕ Find friends</button>
+      <button class="library-button" id="friendCenterBtn" data-i18n="friendCenter">Friends</button>
+      <button class="library-button" id="nearbyFriendBtn" data-i18n="nearbyAddFriend">Add a nearby friend</button>
+      <button class="library-button" id="createGroupBtn" data-i18n="createGroup">＋ Create group</button>
+      <button class="library-button" id="openBotBtn" data-i18n="openBot">✦ Open BlackMessage bot</button>
+      <div class="chat-list" id="chatList"></div>
+      <div class="account-search-section" id="accountSearchSection" hidden>
+        <div class="section-label" data-i18n="usersAndFriends">Users and friends</div>
+        <p class="account-search-note" data-i18n="accountSearchNote">Search accounts saved in this browser only.</p>
+        <div id="accountSearchResults"></div>
+      </div>
+      <div class="profile-row">
+        <button class="profile-open" id="profileMenuBtn" type="button" aria-label="Open profile menu">
+          <span class="avatar purple profile-avatar" id="profileAvatar">
+            <img class="avatar-image" id="profileAvatarImage" alt="" hidden>
+            <span id="profileAvatarInitials">G</span>
+          </span>
+          <span class="profile-info">
+            <strong id="profileName">Guest</strong>
+            <small id="profileMode">Account</small>
+          </span>
+        </button>
+        <button class="icon-btn" id="signOutBtn" title="Sign out" aria-label="Sign out">↪</button>
+      </div>
+    </aside>
+
+    <section class="conversation" id="conversation">
+      <header class="chat-head">
+        <button class="icon-btn back" id="backBtn" aria-label="Back to chats">←</button>
+        <button class="icon-btn mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Open menu" aria-controls="mobileNavigation" aria-expanded="false" title="Open menu">
+          <span aria-hidden="true">☰</span>
+        </button>
+        <div class="avatar" id="activeAvatar">M</div>
+        <div class="chat-copy">
+          <strong id="activeName">Maya Chen</strong>
+          <div class="status" data-i18n="demoChat">● conversation</div>
+        </div>
+        <div class="message-filter" id="messageFilter" hidden>
+          <input id="messageFilterInput" type="search" aria-label="Filter messages" data-i18n-placeholder="filterPlaceholder" placeholder="Filter messages">
+          <button class="icon-btn" id="clearMessageFilter" type="button" aria-label="Clear message filter">×</button>
+        </div>
+        <button class="icon-btn" id="toggleMessageFilter" type="button" aria-label="Filter messages" data-i18n-title="filterMessages" title="Filter messages">⌕</button>
+        <button class="icon-btn" id="contactActionsBtn" title="Friend options" aria-label="Friend options">⋯</button>
+      </header>
+      <div class="messages" id="messages">
+      </div>
+      <div class="reply-context" id="replyContext" hidden>
+        <div><strong data-i18n="replyingTo">Replying to</strong><span id="replyContextText"></span></div>
+        <button class="icon-btn" id="cancelReplyBtn" type="button" aria-label="Cancel reply">×</button>
+      </div>
+      <form class="composer" id="messageForm">
+        <button class="voice-chat-btn" id="voiceChatBtn" type="button" aria-label="Voice chat" title="Voice chat">
+          <svg class="voice-chat-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+            <rect x="9" y="3" width="6" height="12" rx="3" fill="currentColor"></rect>
+            <path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+          <span class="voice-chat-label" id="voiceChatLabel">Start</span>
+          <span class="voice-chat-bars" aria-hidden="true">
+            <span class="voice-chat-bar"></span>
+            <span class="voice-chat-bar"></span>
+            <span class="voice-chat-bar"></span>
+            <span class="voice-chat-bar"></span>
+            <span class="voice-chat-bar"></span>
+            <span class="voice-chat-bar"></span>
+            <span class="voice-chat-bar"></span>
+          </span>
+        </button>
+        <span class="voice-volume-meter" id="voiceVolumeMeter" aria-label="Microphone input level" aria-live="polite" hidden>
+          <span class="voice-live-waveform" id="voiceLiveWaveform" aria-hidden="true">
+            <span class="voice-live-bar"></span><span class="voice-live-bar"></span>
+            <span class="voice-live-bar"></span><span class="voice-live-bar"></span>
+            <span class="voice-live-bar"></span><span class="voice-live-bar"></span>
+            <span class="voice-live-bar"></span><span class="voice-live-bar"></span>
+            <span class="voice-live-bar"></span><span class="voice-live-bar"></span>
+            <span class="voice-live-bar"></span>
+          </span>
+          <span class="voice-volume-track"><span id="voiceVolumeLevel"></span></span>
+          <span id="voiceVolumeValue">0%</span>
+        </span>
+        <span class="voice-chat-status" id="voiceChatStatus" role="status" aria-live="polite" hidden></span>
+        <button class="voice-chat-stop" id="voiceChatStopBtn" type="button" aria-label="Stop recording" title="Stop recording" hidden>Stop</button>
+        <div class="voice-message-preview" id="voiceMessagePreview" hidden>
+          <audio id="voiceMessagePreviewAudio" controls></audio>
+          <button class="voice-message-send" id="sendVoiceMessageBtn" type="button">Send voice</button>
+          <button class="voice-message-discard" id="discardVoiceMessageBtn" type="button">Discard</button>
+        </div>
+        <label class="icon-btn attach-button" id="attachFilesBtn" for="messageUpload" title="Attach files" aria-label="Attach files">＋</label>
+        <input id="messageUpload" type="file" multiple hidden>
+        <input id="messageInput" data-i18n-placeholder="writeMessage" placeholder="Write a message…" autocomplete="off">
+        <button class="send" type="submit" data-i18n="send">Send</button>
+      </form>
+      <p class="message-storage-note" data-i18n="originalQualityNote">Files are not compressed. A 500 MB file can be selected, but saving depends on available browser storage; files stay on this device.</p>
+      <p class="auth-error message-upload-error" id="messageUploadError" role="alert" hidden></p>
+      <div class="attachment-upload-overlay" id="attachmentUploadOverlay" hidden role="status" aria-live="polite">
+        <div class="attachment-upload-card">
+          <div class="attachment-progress-track" aria-hidden="true"><span></span></div>
+          <p data-i18n="uploadFilesLabel">Uploading files…</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-page" id="profilePage" hidden>
+      <header class="profile-page-header">
+        <button class="secondary" id="backFromProfile" type="button" data-i18n="backToChat">← Back to chat</button>
+        <span class="profile-visibility-badge" id="profileVisibilityBadge"></span>
+      </header>
+      <div class="public-profile-card">
+        <img class="public-profile-avatar" id="publicProfileImage" alt="" hidden>
+        <div class="avatar purple public-profile-placeholder" id="publicProfilePlaceholder">G</div>
+        <div class="public-profile-details">
+          <h1 id="publicProfileName"></h1>
+          <p id="publicProfileSubtitle"></p>
+          <p class="profile-account-meta" id="profileAccountMeta"></p>
+          <span class="developer-badge" id="developerBadge" data-i18n="developerBadge" hidden>مُبرمجة هذا التطبيق</span>
+        </div>
+        <button class="secondary" id="editProfilePageBtn" type="button" data-i18n="editProfile" hidden>Edit profile</button>
+        <button class="send" id="followProfileBtn" type="button" hidden></button>
+      </div>
+      <div class="profile-stats" id="profileStats">
+        <div><strong id="profileFollowersCount">0</strong><span data-i18n="followers">Followers</span></div>
+        <div><strong id="profileFriendsCount">0</strong><span data-i18n="friends">Friends</span></div>
+        <div><strong id="profileViewsCount">0</strong><span data-i18n="views">Views</span></div>
+        <div><strong id="profileLikesCount">0</strong><span data-i18n="likes">Likes</span></div>
+      </div>
+      <div class="profile-page-content">
+        <section class="profile-about">
+          <h2 data-i18n="aboutProfile">About</h2>
+          <p id="profileAboutText"></p>
+          <div class="profile-members" id="profileMembers" hidden></div>
+        </section>
+        <section class="profile-gallery" id="profileGallerySection">
+          <h2 data-i18n="sharedPhotos">Photos</h2>
+          <p data-i18n="profileDemoCounts">Profile statistics and activity.</p>
+          <div class="profile-gallery-grid" id="profileGallery"></div>
+        </section>
+      </div>
+      <section class="profile-posts">
+        <div class="profile-posts-heading">
+          <div><h2 data-i18n="posts">Posts</h2><p id="postsVisibilityNote" data-i18n="postsPrivateNote">Posts appear here when your profile is global.</p></div>
+          <label class="secondary upload-button" id="newPostLabel" for="postUpload" data-i18n="createPost" hidden>＋ Create post</label>
+          <input id="postUpload" type="file" accept="image/*,video/*" multiple hidden>
+        </div>
+        <div class="profile-post-composer" id="profilePostComposer" hidden>
+          <textarea class="field" id="postCaption" maxlength="500" rows="3" data-i18n-placeholder="postCaption" placeholder="Write a caption"></textarea>
+          <button class="send" id="publishPostBtn" type="button" data-i18n="publishPost">Publish</button>
+        </div>
+        <p class="auth-error" id="postError" role="alert" hidden></p>
+        <div class="profile-post-list" id="profilePostList"></div>
+      </section>
+      <div class="public-profile-actions">
+        <button class="secondary" id="simulateFollowerBtn" type="button" data-i18n="simulateFollower" hidden>Show a follower notification</button>
+        <button class="send" id="likeProfileBtn" type="button" data-i18n="likeProfile">Like profile</button>
+        <button class="secondary" id="profileMoreBtn" type="button" data-i18n="moreActions">More actions</button>
+        <button class="secondary" id="profilePageBackBtn" type="button" data-i18n="backToChat">← Back to chat</button>
+      </div>
+    </section>
+
+    <section class="friends-view" id="friendsView" hidden>
+      <header class="files-header">
+        <div><h1 id="friendCenterTitle" data-i18n="findFriendsTitle">Find friends</h1><p id="friendCenterDescription" data-i18n="accountSearchNote">Search accounts saved in this browser only.</p></div>
+        <button class="secondary" id="backFromFriends" type="button" data-i18n="backToChat">← Back to chat</button>
+      </header>
+      <nav class="friend-center-tabs" aria-label="Friend management">
+        <button class="friend-center-tab active" type="button" data-friend-section="search" aria-pressed="true" data-i18n="findFriends">Find friends</button>
+        <button class="friend-center-tab" id="friendRequestsTab" type="button" data-friend-section="requests" aria-pressed="false" data-i18n="friendRequests">Friend requests</button>
+        <button class="friend-center-tab" id="blockedFriendsTab" type="button" data-friend-section="blocked" aria-pressed="false" data-i18n="blockedFriends">Blocked friends</button>
+      </nav>
+      <div id="friendSearchPanel">
+      <nav class="friend-search-tabs" aria-label="Find friends categories">
+        <button class="friend-search-tab active" type="button" data-friend-kind="people" aria-pressed="true" data-i18n="people">People</button>
+        <button class="friend-search-tab" type="button" data-friend-kind="groups" aria-pressed="false" data-i18n="groups">Groups</button>
+        <button class="friend-search-tab" type="button" data-friend-kind="bots" aria-pressed="false" data-i18n="bots">Bots</button>
+        <button class="send friend-search-create" id="findCreateGroupBtn" type="button" data-i18n="createGroup">＋ Create group</button>
+      </nav>
+      <input class="search friends-search" id="friendSearchInput" type="search" data-i18n-placeholder="friendSearchPlaceholder" placeholder="Search by name or username">
+      <div class="friends-results" id="friendSearchResults"></div>
+      </div>
+      <section id="friendRequestsPanel" hidden aria-label="Friend requests"></section>
+      <section id="blockedFriendsPanel" hidden aria-label="Blocked friends"></section>
+    </section>
+
+    <section class="files-view" id="filesView" hidden>
+      <header class="files-header">
+        <div><h1 data-i18n="myFiles">My files</h1><p data-i18n="filesNotice">Files are stored in this browser on this device.</p></div>
+        <div class="files-header-actions">
+          <button class="secondary" type="button" id="backFromFiles" data-i18n="backToChat">← Back to chat</button>
+          <button class="secondary" type="button" id="signOutFilesBtn" data-i18n="signOut">Sign out</button>
+        </div>
+      </header>
+      <div class="files-controls">
+        <form id="folderForm" class="folder-form">
+          <label for="folderName" data-i18n="newFolder">New folder</label>
+          <input class="field" id="folderName" maxlength="48" required data-i18n-placeholder="folderPlaceholder" placeholder="Folder name">
+          <button class="send" type="submit" data-i18n="createFolder">Create folder</button>
+        </form>
+        <label class="upload-button secondary" for="fileUpload" data-i18n="uploadFiles">＋ Add files</label>
+        <input id="fileUpload" type="file" multiple hidden>
+      </div>
+      <p class="auth-error" id="filesError" role="alert" hidden></p>
+      <div class="folder-grid" id="folderGrid"></div>
+      <div class="stored-files">
+        <h2 id="selectedFolderName"></h2>
+        <div class="file-grid" id="storedFiles"></div>
+      </div>
+    </section>
+
+    <section class="code-studio" id="codeStudio" hidden>
+      <div class="code-topbar">
+        <div><strong data-i18n="codeStudio">Code Studio</strong> <span style="color:var(--muted)" data-i18n="myProject">/ My project</span></div>
+        <div class="code-actions">
+          <button id="backToChat" type="button" data-i18n="backToChat">← Back to chat</button>
+          <button id="signOutCodeBtn" type="button" data-i18n="signOut">Sign out</button>
+          <select id="languageSelect" aria-label="File language">
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="csharp">C#</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+          </select>
+          <button id="copyCode" type="button" data-i18n="copy">Copy</button>
+          <button id="downloadCode" type="button" data-i18n="download">Download</button>
+        </div>
+      </div>
+      <div class="code-workspace">
+        <aside class="file-sidebar">
+          <div class="file-label" data-i18n="explorer">Explorer</div>
+          <div class="file-item" id="fileName">✦ main.js</div>
+        </aside>
+        <div class="editor-area">
+          <div class="editor-tab" id="editorTab">✦ &nbsp;main.js</div>
+          <div class="editor-wrap">
+            <pre class="line-numbers" id="lineNumbers">1</pre>
+            <textarea id="codeEditor" spellcheck="false" aria-label="Code editor"
+              autocomplete="off" autocapitalize="off">// Write your bot or app code here.
+// This editor saves your text in this browser.
+
+function startBot() {
+  console.log("Hello from BlackMessage!");
+}
+
+startBot();</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="code-bottom">
+        <span id="saveStatus" data-i18n="readySaved">Ready · saved in this browser</span>
+        <span data-i18n="codeStudio">Code Studio</span>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="first-welcome-dialog" id="firstWelcomeDialog" aria-labelledby="firstWelcomeTitle">
+    <div class="first-welcome-card">
+      <span class="first-welcome-mark" aria-hidden="true">➤</span>
+      <h2 id="firstWelcomeTitle" data-i18n="firstWelcomeTitle">Welcome to BlackMessage</h2>
+      <p data-i18n="firstWelcomeDescription">Your account is ready. Start chatting whenever you’re ready.</p>
+      <p class="auth-error" id="firstWelcomeError" role="alert" hidden></p>
+      <button class="send auth-submit" id="startAppBtn" type="button" data-i18n="startApp">Start</button>
+    </div>
+  </dialog>
+
+  <dialog id="settingsDialog">
+    <div class="settings-dialog">
+      <h2 style="margin-top:0" data-i18n="settings">Settings</h2>
+      <p style="color:var(--muted)" data-i18n="settingsNotice">Customize your app.</p>
+      <div class="setting-row">
+        <div><strong data-i18n="colorTheme">Color theme</strong><small data-i18n="themeHelp">Choose light or dark mode</small></div>
+        <div class="language-choice-buttons theme-choice-buttons" role="group" aria-label="Color theme">
+          <button class="language-choice theme-choice" type="button" data-theme-choice="dark" aria-pressed="false" data-i18n="dark">Dark</button>
+          <button class="language-choice theme-choice" type="button" data-theme-choice="light" aria-pressed="false" data-i18n="light">Light</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="reduceMotion">Reduce animations</strong><small data-i18n="motionHelp">Turn off interface motion</small></div>
+        <input type="checkbox" id="motionToggle">
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="requireAppPin">Require a 4-digit code</strong><small data-i18n="appPinHelp">Ask for your code when you reopen the app</small></div>
+        <input type="checkbox" id="requireAppPinToggle">
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="messageSound">Incoming message sound</strong><small data-i18n="soundHelp">Play a tone for incoming replies</small></div>
+        <input type="checkbox" id="soundToggle" checked>
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="language">Language</strong><small data-i18n="languageHelp">Choose the interface language</small></div>
+        <div class="language-choice-buttons" role="group" aria-label="Language">
+          <button class="language-choice active" type="button" data-language="en" aria-pressed="true">English</button>
+          <button class="language-choice" type="button" data-language="fr" aria-pressed="false">Français</button>
+          <button class="language-choice" type="button" data-language="ar" aria-pressed="false">العربية</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="myMessageColor">My message color</strong><small data-i18n="myMessageColorHelp">Customize sent message bubbles</small></div>
+        <input type="color" id="myMessageColor" aria-label="My message color">
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="friendMessageColor">Friend message color</strong><small data-i18n="friendMessageColorHelp">Customize received message bubbles</small></div>
+        <input type="color" id="friendMessageColor" aria-label="Friend message color">
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="profilePrivacy">Profile visibility</strong><small data-i18n="privacyHelp">Choose who can see your profile</small></div>
+        <select id="profilePrivacy" aria-label="Profile visibility">
+          <option value="private" data-i18n="privateProfile">Private</option>
+          <option value="global" data-i18n="globalProfile">Global</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div><strong data-i18n="profileAbout">About me</strong><small data-i18n="aboutHelp">Shown on your profile</small></div>
+      </div>
+      <textarea class="field" id="profileAbout" maxlength="240" rows="3" data-i18n-placeholder="aboutPlaceholder" placeholder="A little about you"></textarea>
+      <div style="text-align:right;margin-top:18px">
+        <button class="send" id="closeSettings" type="button" data-i18n="done">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="pin-dialog" id="pinDialog" aria-labelledby="pinDialogTitle">
+    <div class="settings-dialog pin-dialog-content">
+      <div class="brand auth-brand"><img class="logo-img" src="assets/logo.svg" alt="BlackMessage logo"> BlackMessage</div>
+      <h2 id="pinDialogTitle" data-i18n="setupPinTitle">Set your app code</h2>
+      <p id="pinDialogDescription" data-i18n="setupPinDescription">Create a 4-digit code to protect this app on this device.</p>
+      <div id="pinCodeStage">
+        <label for="appPinInput" id="appPinLabel" data-i18n="fourDigitCode">4-digit code</label>
+        <input class="field pin-number-input" id="appPinInput" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" pattern="[0-9]{4}" placeholder="••••">
+        <div id="pinConfirmGroup">
+          <label for="appPinConfirmInput" id="appPinConfirmLabel" data-i18n="confirmFourDigitCode">Confirm 4-digit code</label>
+          <input class="field pin-number-input" id="appPinConfirmInput" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" pattern="[0-9]{4}" placeholder="••••">
+        </div>
+        <p class="auth-error" id="pinError" role="alert" hidden></p>
+        <button class="send auth-submit" id="submitAppPin" type="button" data-i18n="saveAppPin">Save code</button>
+        <button class="secondary pin-forgot-button" id="forgotAppPinBtn" type="button" data-i18n="forgotAppPin" hidden>Forgot code?</button>
+      </div>
+      <div id="pinRecoveryStage" hidden>
+        <p data-i18n="pinRecoveryNotice">A six-digit recovery code will be shown here. No email is sent.</p>
+        <output id="pinRecoveryDemoCode" class="demo-code"></output>
+        <label for="pinRecoveryCodeInput" data-i18n="sixDigitCode">Six-digit code</label>
+        <input class="field verification-input" id="pinRecoveryCodeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000">
+        <p class="auth-error" id="pinRecoveryError" role="alert" hidden></p>
+        <button class="send auth-submit" id="verifyPinRecoveryBtn" type="button" data-i18n="verify">Verify</button>
+      </div>
+      <button class="secondary pin-signout-button" id="pinSignOutBtn" type="button" data-i18n="signOut">Sign out</button>
+    </div>
+  </dialog>
+
+  <dialog id="accountActionsDialog">
+    <div class="settings-dialog contact-dialog">
+      <div class="contact-dialog-heading">
+        <div class="avatar" id="accountActionAvatar">U</div>
+        <div><h2 id="accountActionName">Account</h2><p id="accountActionUsername"></p></div>
+      </div>
+      <div class="contact-actions">
+        <button class="secondary" id="viewAccountProfileBtn" type="button" data-i18n="viewProfile">View profile</button>
+        <button class="secondary" id="addAccountFriendBtn" type="button" data-i18n="addFriend">Add friend</button>
+        <button class="danger-button" id="removeAccountFriendBtn" type="button" data-i18n="removeFriend">Remove friend</button>
+        <button class="danger-button" id="blockAccountBtn" type="button" data-i18n="blockFriend">Block account</button>
+        <button class="send" id="closeAccountActionsBtn" type="button" data-i18n="done">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="profileDialog">
+    <form class="settings-dialog" id="profileForm">
+      <h2 style="margin-top:0" data-i18n="profileSettings">Profile</h2>
+      <div class="profile-preview">
+        <img id="profileImagePreview" alt="" hidden>
+        <div class="avatar purple profile-placeholder" id="profileImagePlaceholder">G</div>
+      </div>
+      <label for="profileImageUpload" class="secondary upload-button" data-i18n="changePhoto">Choose profile photo</label>
+      <input id="profileImageUpload" type="file" accept="image/*" hidden>
+      <p class="auth-error" id="profilePhotoError" role="alert" hidden></p>
+      <label for="profileDisplayName" data-i18n="displayName">Display name</label>
+      <input class="field" id="profileDisplayName" maxlength="32" required>
+      <p class="profile-privacy-note" id="profileRenameNotice" data-i18n="renameVerificationNote">Changing your name requires verifying the same email address again.</p>
+      <p class="auth-error" id="profileNameError" role="alert" hidden></p>
+      <div class="setting-row">
+        <div><strong data-i18n="profilePrivacy">Profile visibility</strong><small data-i18n="privacyHelp">Choose who can see your profile</small></div>
+        <select id="profilePrivacyMenu" aria-label="Profile visibility">
+          <option value="private" data-i18n="privateProfile">Private</option>
+          <option value="global" data-i18n="globalProfile">Global</option>
+        </select>
+      </div>
+      <p class="profile-privacy-note" data-i18n="privacyDemoNotice">Profile visibility is saved with your account on this device.</p>
+      <button class="secondary" id="viewOwnProfileBtn" type="button" data-i18n="viewProfile">View profile</button>
+      <div class="modal-actions">
+        <button class="secondary" type="button" id="closeProfile" data-i18n="cancel">Cancel</button>
+        <button class="send" type="submit" data-i18n="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="contactDialog">
+    <div class="settings-dialog contact-dialog">
+      <div class="contact-dialog-heading">
+        <div class="avatar" id="contactDialogAvatar">M</div>
+        <div><h2 id="contactDialogName">Friend</h2><p data-i18n="friendOptions">Friend options</p></div>
+      </div>
+      <p class="contact-warning" data-i18n="contactDemoNotice">These settings apply to your account on this device.</p>
+      <div class="contact-actions">
+        <button class="secondary" id="viewFriendProfileBtn" type="button" data-i18n="viewProfile">View profile</button>
+        <button class="secondary" id="friendVisibilityBtn" type="button" data-i18n="hideProfile">Hide my profile from this friend</button>
+        <button class="danger-button" id="blockFriendBtn" type="button" data-i18n="blockFriend">Block friend</button>
+        <button class="secondary" id="removeFriendBtn" type="button" data-i18n="removeFriend">Remove friend</button>
+        <button class="secondary" id="simulateBlockBtn" type="button" data-i18n="simulateBlock">Show block notification</button>
+        <button class="send" id="closeContactDialog" type="button" data-i18n="done">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="groupDialog">
+    <form class="settings-dialog" id="groupForm">
+      <h2 style="margin-top:0" data-i18n="createGroup">Create group</h2>
+      <p data-i18n="groupDemoNotice">Create a group conversation.</p>
+      <label for="groupName" data-i18n="groupName">Group name</label>
+      <input class="field" id="groupName" maxlength="40" required data-i18n-placeholder="groupNamePlaceholder" placeholder="e.g. Project team">
+      <label for="groupMembers" data-i18n="groupMembers">Members (separate names with commas)</label>
+      <input class="field" id="groupMembers" data-i18n-placeholder="groupMembersPlaceholder" placeholder="Alex, Sam">
+      <p class="auth-error" id="groupError" role="alert" hidden></p>
+      <div class="modal-actions">
+        <button class="secondary" type="button" id="cancelGroupBtn" data-i18n="cancel">Cancel</button>
+        <button class="send" type="submit" data-i18n="createGroup">Create group</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="messageActionsDialog">
+    <div class="settings-dialog message-actions-dialog">
+      <h2 data-i18n="messageActions">Message actions</h2>
+      <p id="messageActionSummary" class="message-action-summary"></p>
+      <p class="auth-error" id="messageActionFeedback" role="alert" hidden></p>
+      <div class="contact-actions">
+        <button class="secondary" id="downloadMessageBtn" type="button" data-i18n="downloadFile" hidden>Download</button>
+        <button class="secondary" id="viewMessageMediaBtn" type="button" data-i18n="viewMedia">View media</button>
+        <button class="secondary" id="editMessageBtn" type="button" data-i18n="editMessage" hidden>Edit message</button>
+        <button class="secondary" id="replyMessageBtn" type="button" data-i18n="replyMessage">Reply</button>
+        <button class="secondary" id="pinMessageBtn" type="button" data-i18n="pinMessage">Pin message</button>
+        <button class="secondary" id="blurMessageBtn" type="button" data-i18n="blurImage">Blur image</button>
+        <button class="secondary" id="deleteMessageBtn" type="button" data-i18n="deleteMessage">Delete message</button>
+        <button class="secondary" id="filterMessageBtn" type="button" data-i18n="filterMessages">Filter messages</button>
+        <button class="secondary" id="copyMessageBtn" type="button" data-i18n="copyMessage">Copy message</button>
+        <button class="send" id="closeMessageActions" type="button" data-i18n="done">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="editMessageDialog" aria-labelledby="editMessageTitle">
+    <div class="settings-dialog message-actions-dialog">
+      <h2 id="editMessageTitle" data-i18n="editMessageTitle">Edit your message</h2>
+      <label for="editMessageInput" data-i18n="editMessage">Edit message</label>
+      <textarea class="field edit-message-input" id="editMessageInput" rows="5"></textarea>
+      <p class="auth-error" id="editMessageError" role="alert" hidden></p>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelEditMessage" type="button" data-i18n="cancel">Cancel</button>
+        <button class="send" id="saveEditedMessage" type="button" data-i18n="save">Save</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="media-viewer-dialog" id="mediaViewerDialog" aria-label="Media viewer">
+    <div class="media-viewer-content">
+      <button class="icon-btn media-viewer-close" id="closeMediaViewer" type="button" aria-label="Close">×</button>
+      <div id="mediaViewerBody"></div>
+    </div>
+  </dialog>
+
+  <aside class="message-toast" id="messageToast" hidden role="status" aria-live="polite">
+    <div class="avatar" id="toastAvatar">M</div>
+    <div class="toast-copy"><strong id="toastName"></strong><span id="toastMessage"></span></div>
+    <button class="icon-btn toast-close" id="closeToast" type="button" aria-label="Dismiss">×</button>
+  </aside>
+
+  <dialog class="account-loading" id="accountLoading" aria-labelledby="accountLoadingText" aria-live="polite">
+    <div class="account-loading-content">
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <p id="accountLoadingText"></p>
+    </div>
+  </dialog>
+
+  <dialog id="nearbyFriendDialog" aria-labelledby="nearbyFriendTitle">
+    <div class="nearby-friend-dialog">
+      <h2 id="nearbyFriendTitle" data-i18n="nearbyAddFriend">Add a nearby friend</h2>
+      <p class="nearby-friend-note" data-i18n="nearbyFriendLimit">Scan or share a QR code to add a contact on this device. This does not connect devices or sync messages.</p>
+      <section class="nearby-own-code">
+        <h3 data-i18n="yourFriendCode">Your friend QR code</h3>
+        <article class="nearby-profile-card nearby-own-card">
+          <div class="nearby-profile-heading">
+            <img class="nearby-profile-photo" id="nearbyOwnPhoto" alt="" hidden>
+            <div class="nearby-profile-avatar" id="nearbyOwnAvatar" aria-hidden="true">U</div>
+            <div class="nearby-profile-copy">
+              <strong id="nearbyOwnName"></strong>
+              <span id="nearbyOwnUsername"></span>
+            </div>
+          </div>
+          <canvas id="nearbyFriendQr" width="318" height="318" role="img" aria-label="Your friend QR code"></canvas>
+        </article>
+        <div class="nearby-code-row">
+          <input class="field" id="nearbyFriendCode" type="text" readonly aria-label="Your friend code">
+          <button class="secondary" id="copyNearbyFriendCode" type="button" data-i18n="copyFriendCode">Copy code</button>
+        </div>
+      </section>
+      <section class="nearby-scan-section">
+        <h3 data-i18n="addFriendByCode">Scan a friend’s QR or enter their code</h3>
+        <div class="nearby-scan-actions">
+          <button class="send" id="scanNearbyFriendBtn" type="button" data-i18n="scanFriendQr">Scan QR with camera</button>
+          <label class="secondary nearby-image-label" for="nearbyFriendImage" data-i18n="chooseQrImage">Choose QR image</label>
+          <input id="nearbyFriendImage" type="file" accept="image/*" capture="environment" hidden>
+        </div>
+        <video id="nearbyFriendCamera" playsinline muted hidden></video>
+        <p id="nearbyFriendStatus" role="status" aria-live="polite" hidden></p>
+        <label for="nearbyFriendCodeInput" data-i18n="friendCodeLabel">Friend code</label>
+        <input class="field" id="nearbyFriendCodeInput" type="text" autocomplete="off" data-i18n-placeholder="friendCodePlaceholder" placeholder="BM1|username|name">
+        <p class="auth-error" id="nearbyFriendError" role="alert" hidden></p>
+        <article class="nearby-profile-card nearby-scanned-card" id="nearbyScannedCard" hidden>
+          <div class="nearby-profile-heading">
+            <img class="nearby-profile-photo" id="nearbyScannedPhoto" alt="" hidden>
+            <div class="nearby-profile-avatar" id="nearbyScannedAvatar" aria-hidden="true">U</div>
+            <div class="nearby-profile-copy">
+              <strong id="nearbyScannedName"></strong>
+              <span id="nearbyScannedUsername"></span>
+            </div>
+          </div>
+          <p class="nearby-profile-note" data-i18n="nearbyProfilePhotoNote">A profile photo is shown when available on this device. QR codes do not transfer photos between devices.</p>
+          <p class="nearby-profile-status" id="nearbyScannedStatus" role="status" aria-live="polite" hidden></p>
+          <div class="nearby-profile-actions">
+            <button class="friend-request-action friend-request-accept" id="acceptNearbyFriendBtn" type="button" data-i18n="addFriend">Add friend</button>
+            <button class="friend-request-action friend-request-block" id="blockNearbyFriendBtn" type="button" data-i18n="blockFriend">Block</button>
+            <button class="friend-request-action friend-request-decline" id="dismissNearbyFriendBtn" type="button" data-i18n="noThanks">No thanks</button>
+          </div>
+        </article>
+        <div class="nearby-dialog-actions">
+          <button class="secondary" id="closeNearbyFriendDialog" type="button" data-i18n="done">Done</button>
+        </div>
+      </section>
+    </div>
+  </dialog>
+
+  <script src="qr-code.js"></script>
+  <script src="bluebird.js"></script>
+  <script src="telegram.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,21 @@
+{
+  "name": "BlackMessage",
+  "short_name": "BlackMessage",
+  "description": "A dark, fast messenger. Chat, share files and keep your conversations private.",
+  "id": "/blackmessage/",
+  "start_url": "./app.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0e1621",
+  "theme_color": "#0e1621",
+  "lang": "en",
+  "categories": ["social", "communication"],
+  "icons": [
+    { "src": "assets/logo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/logo-256.png", "sizes": "256x256", "type": "image/png", "purpose": "any" },
+    { "src": "assets/logo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/logo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
