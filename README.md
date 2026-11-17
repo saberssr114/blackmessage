@@ -55,6 +55,10 @@
 
 <div align="center">
   <img src="assets/tutorial.png" alt="BLACKMESSAGE 3-Step Tutorial" width="100%" />
+  
+  ![image alt](https://raw.githubusercontent.com/saberssr114/blackmessage/refs/heads/main/Gemini_Generated_Image_bf72d2bf72d2bf72%20(3).jfif)
+
+
 </div>
 
 ### Step 1 — Download the App
