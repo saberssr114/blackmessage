@@ -10,7 +10,11 @@
 **Meet the *black* bot — a dark, fast messenger for Android and Windows.**
 
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Windows-ff3b1f?style=for-the-badge)](https://github.com/saberssr114)
+
+
 [![Version](https://img.shields.io/badge/Version-1.0-c42200?style=for-the-badge)](https://github.com/saberssr114)
+
+
 [![License](https://img.shields.io/badge/Price-Free-0a0b10?style=for-the-badge&labelColor=ff3b1f)](https://github.com/saberssr114)
 
 [Features](#-features) • [Theme & Preview](#-theme--preview) • [Tutorial](#-tutorial-how-it-works) • [Download](#-download) • [FAQ](#-faq) • [About](#-about)
